@@ -1,5 +1,7 @@
 import { useState } from "react";
 import dayjs from "dayjs";
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
 
 const members = [
   "Tuấn Khôi",
@@ -184,6 +186,11 @@ const todayString = dayjs().format("DD/MM/YYYY");
 const todaySchedule = masterSchedule.find(
   (item) => item.date === todayString
 );
+
+const personScheduleDates =
+  personSchedule.map(
+    (item) => item.date
+  );
 
 console.log("Today:", dayjs().format());
 console.log("Next shift:", nextShift);
@@ -372,46 +379,84 @@ console.log("Next shift:", nextShift);
 
           <div
             style={{
-              display: "grid",
-              gap: "15px",
+              background: "#161c2d",
+              borderRadius: "12px",
+              padding: "20px",
+              border: "1px solid #2b3248",
             }}
           >
-            {personSchedule.map((item, index) => (
-              <div
-                key={index}
-                style={{
-                  background: "#161c2d",
-                  border: "1px solid #2b3248",
-                  borderRadius: "12px",
-                  padding: "18px",
-                  boxShadow:
-                    "0 4px 10px rgba(0,0,0,0.2)",
-                }}
-              >
-                <h3
-                  style={{
-                    margin: 0,
-                    marginBottom: "10px",
-                  }}
-                >
-                  📅 {item.date}
-                </h3>
+            <Calendar
+              locale="vi-VN"
+              tileContent={({ date }) => {
+                const formatted =
+                  dayjs(date).format(
+                    "DD/MM/YYYY"
+                  );
 
-                <div
-                  style={{
-                    fontSize: "18px",
-                    color: "#ddd",
-                  }}
-                >
-                  {item.shift === "18h - 22h"
-                    ? "🕕"
-                    : item.shift === "22h - 24h"
-                    ? "📋"
-                    : "🌙"}{" "}
-                  {item.shift}
-                </div>
+                const shift =
+                  personSchedule.find(
+                    (item) =>
+                      item.date ===
+                      formatted
+                  );
+
+                if (!shift) {
+                  return null;
+                }
+
+                let color = "#22c55e";
+
+                if (
+                  shift.shift ===
+                  "22h - 24h"
+                ) {
+                  color = "#f97316";
+                }
+
+                if (
+                  shift.shift ===
+                  "22h - 06h30"
+                ) {
+                  color = "#a855f7";
+                }
+
+                return (
+                  <div
+                    style={{
+                      width: "10px",
+                      height: "10px",
+                      borderRadius: "50%",
+                      background: color,
+                      margin:
+                        "4px auto 0",
+                    }}
+                  />
+                );
+              }}
+            />
+
+            <div
+              style={{
+                marginTop: "20px",
+                display: "flex",
+                justifyContent:
+                  "center",
+                gap: "20px",
+                flexWrap: "wrap",
+              }}
+            >
+              <div>
+                🟢 18h - 22h
               </div>
-            ))}
+
+              <div>
+                🟠 22h - 24h
+              </div>
+
+              <div>
+                🟣 22h - 06h30
+              </div>
+            </div>
           </div>
         </>
       )}
