@@ -143,15 +143,43 @@ export default function App() {
 
   const today = dayjs();
 
-    const nextShift = personSchedule
-  .filter((item) =>
-    dayjs(item.date, "DD/MM/YYYY")
-      .isAfter(dayjs().subtract(1, "day"))
-  )
-  .sort((a, b) =>
-    dayjs(a.date, "DD/MM/YYYY").valueOf() -
-    dayjs(b.date, "DD/MM/YYYY").valueOf()
-  )[0];  
+  const nextShift = personSchedule
+  .filter((item) => {
+    const [day, month, year] = item.date.split("/");
+
+    const shiftDate = new Date(
+      Number(year),
+      Number(month) - 1,
+      Number(day)
+    );
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    return shiftDate >= today;
+  })
+  .sort((a, b) => {
+    const [d1, m1, y1] = a.date.split("/");
+    const [d2, m2, y2] = b.date.split("/");
+
+    const date1 = new Date(
+      Number(y1),
+      Number(m1) - 1,
+      Number(d1)
+    );
+
+    const date2 = new Date(
+      Number(y2),
+      Number(m2) - 1,
+      Number(d2)
+    );
+
+    return date1 - date2;
+  })[0];
+
+
+console.log("Today:", dayjs().format());
+console.log("Next shift:", nextShift);
 
   return (
     <div
