@@ -1,7 +1,6 @@
 import { useState } from "react";
 import dayjs from "dayjs";
 import Calendar from "react-calendar";
-import "react-calendar/dist/Calendar.css";
 
 const members = [
   "Tuấn Khôi",
@@ -356,8 +355,11 @@ console.log("Next shift:", nextShift);
                   "10px",
                 padding:
                   "20px",
-                marginBottom:
-                  "20px",
+                maxWidth: 
+                  "900px",
+                margin: 
+                  "0 auto 20px auto",
+                textAlign: "center",
               }}
             >
               <h2
@@ -379,25 +381,56 @@ console.log("Next shift:", nextShift);
 
           <div
             style={{
-              background: "#161c2d",
-              borderRadius: "12px",
-              padding: "20px",
-              border: "1px solid #2b3248",
+              background: "#0f1b45",
+              borderRadius: "16px",
+              padding: "25px",
+              border: "1px solid rgba(255,255,255,0.08)",
+              maxWidth: "900px",
+              margin: "0 auto",
             }}
           >
+            <h2
+              style={{
+                textAlign: "center",
+                marginBottom: "20px",
+              }}
+            >
+              📅 Lịch trực cá nhân
+            </h2>
+
+            <p
+              style={{
+                color: "#9ca3af",
+                marginBottom: "20px",
+                textAlign: "center",
+              }}
+            >
+              Chọn tháng để xem lịch trực
+            </p>
+
             <Calendar
-              locale="vi-VN"
-              tileContent={({ date }) => {
+              locale="en-US"
+              calendarType="gregory"
+              tileClassName={({ date }) => {
                 const formatted =
-                  dayjs(date).format(
-                    "DD/MM/YYYY"
-                  );
+                  dayjs(date).format("DD/MM/YYYY");
 
                 const shift =
                   personSchedule.find(
                     (item) =>
-                      item.date ===
-                      formatted
+                      item.date === formatted
+                  );
+
+                return shift ? "has-shift" : "";
+              }}
+              tileContent={({ date }) => {
+                const formatted =
+                  dayjs(date).format("DD/MM/YYYY");
+
+                const shift =
+                  personSchedule.find(
+                    (item) =>
+                      item.date === formatted
                   );
 
                 if (!shift) {
@@ -406,29 +439,22 @@ console.log("Next shift:", nextShift);
 
                 let color = "#22c55e";
 
-                if (
-                  shift.shift ===
-                  "22h - 24h"
-                ) {
+                if (shift.shift === "22h - 24h") {
                   color = "#f97316";
                 }
 
-                if (
-                  shift.shift ===
-                  "22h - 06h30"
-                ) {
+                if (shift.shift === "22h - 06h30") {
                   color = "#a855f7";
                 }
 
                 return (
                   <div
                     style={{
-                      width: "10px",
-                      height: "10px",
+                      width: "8px",
+                      height: "8px",
                       borderRadius: "50%",
                       background: color,
-                      margin:
-                        "4px auto 0",
+                      margin: "4px auto 0",
                     }}
                   />
                 );
