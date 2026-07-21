@@ -130,16 +130,17 @@ export default function App() {
       masterSchedule
     );
 
-  const selectedDay =
-    masterSchedule.find(
-      (item) =>
-        dayjs(
-          item.date,
-          "DD/MM/YYYY"
-        ).format(
-          "YYYY-MM-DD"
-        ) === selectedDate
-    );
+  const selectedDay = masterSchedule.find(
+    (item) => {
+      const [day, month, year] =
+        item.date.split("/");
+
+      const formattedDate =
+        `${year}-${month}-${day}`;
+
+      return formattedDate === selectedDate;
+    }
+  );
 
   const today = dayjs();
 
