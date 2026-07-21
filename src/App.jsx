@@ -178,6 +178,12 @@ export default function App() {
     return date1 - date2;
   })[0];
 
+  
+const todayString = dayjs().format("DD/MM/YYYY");
+
+const todaySchedule = masterSchedule.find(
+  (item) => item.date === todayString
+);
 
 console.log("Today:", dayjs().format());
 console.log("Next shift:", nextShift);
@@ -186,6 +192,8 @@ console.log("Next shift:", nextShift);
     <div
       style={{
         maxWidth: "1200px",
+        position: "relative",
+        zIndex: 1,
         margin: "0 auto",
         padding: "30px",
         color: "white",
@@ -196,8 +204,52 @@ console.log("Next shift:", nextShift);
           textAlign: "center",
         }}
       >
-        LỊCH TRỰC DQTV
+        LỊCH TRỰC DQCD 3 - VHXH
       </h1>
+      <p
+        style={{
+          textAlign: "center",
+          color: "#aaa",
+          marginBottom: "30px",
+        }}
+      >
+        Quản lý lịch trực nội bộ
+      </p>
+
+      <div
+        style={{
+          textAlign: "center",
+          marginBottom: "30px",
+          background: "#161c2d",
+          padding: "20px",
+          borderRadius: "12px",
+          border: "1px solid #2b3248",
+        }}
+      >
+        <h3>
+          📅 Hôm nay: {todayString}
+        </h3>
+
+        {todaySchedule ? (
+          <>
+            <p>
+              🕕 18h - 22h: {todaySchedule.shift1822}
+            </p>
+
+            <p>
+              📋 22h - 24h: {todaySchedule.shift2224}
+            </p>
+
+            <p>
+              🌙 22h - 06h30: {todaySchedule.shift220630}
+            </p>
+          </>
+        ) : (
+          <p>
+            😴 Hôm nay không có lịch trực
+          </p>
+        )}
+      </div>
 
       <div
         style={{
@@ -209,6 +261,15 @@ console.log("Next shift:", nextShift);
         }}
       >
         <button
+          style={{
+            borderRadius: "999px",
+            border: "none",
+            padding: "12px 20px",
+            cursor: "pointer",
+            background: "#242b42",
+            color: "white",
+            fontWeight: "bold",
+          }}
           onClick={() =>
             setTab("person")
           }
@@ -217,6 +278,12 @@ console.log("Next shift:", nextShift);
         </button>
 
         <button
+          style={{
+            borderRadius: "8px",
+            border: "none",
+            padding: "10px 15px",
+            cursor: "pointer",
+          }}
           onClick={() =>
             setTab("date")
           }
@@ -236,6 +303,12 @@ console.log("Next shift:", nextShift);
             }}
           >
             <select
+              style={{
+                padding: "10px",
+                borderRadius: "8px",
+                background: "#1e2235",
+                color: "white",
+              }}
               value={
                 selectedPerson
               }
@@ -267,7 +340,9 @@ console.log("Next shift:", nextShift);
             <div
               style={{
                 background:
-                  "#16351d",
+                 "linear-gradient(135deg, #114a1f, #1d6e2f)",
+                boxShadow:
+                  "0 0 30px rgba(0,255,100,0.15)",
                 border:
                   "1px solid #4caf50",
                 borderRadius:
@@ -278,106 +353,66 @@ console.log("Next shift:", nextShift);
                   "20px",
               }}
             >
-              <h3>
-                Ca trực tiếp
-                theo
-              </h3>
+              <h2
+                style={{
+                  marginBottom: "15px",
+                }}
+              >
+                📅 Ca trực tiếp theo
+              </h2>
 
-              <p>
-                <strong>
-                  Ngày:
-                </strong>{" "}
-                {
-                  nextShift.date
-                }
+              <p style={{ fontSize: "20px" }}>
+                📆 {nextShift.date}
               </p>
-
-              <p>
-                <strong>
-                  Ca:
-                </strong>{" "}
-                {
-                  nextShift.shift
-                }
+              <p style={{ fontSize: "20px" }}>
+                🕕 {nextShift.shift}
               </p>
             </div>
           )}
 
-          <table
+          <div
             style={{
-              width:
-                "100%",
-              borderCollapse:
-                "collapse",
+              display: "grid",
+              gap: "15px",
             }}
           >
-            <thead>
-              <tr>
-                <th
+            {personSchedule.map((item, index) => (
+              <div
+                key={index}
+                style={{
+                  background: "#161c2d",
+                  border: "1px solid #2b3248",
+                  borderRadius: "12px",
+                  padding: "18px",
+                  boxShadow:
+                    "0 4px 10px rgba(0,0,0,0.2)",
+                }}
+              >
+                <h3
                   style={{
-                    border:
-                      "1px solid #555",
-                    padding:
-                      "10px",
+                    margin: 0,
+                    marginBottom: "10px",
                   }}
                 >
-                  Ngày
-                </th>
+                  📅 {item.date}
+                </h3>
 
-                <th
+                <div
                   style={{
-                    border:
-                      "1px solid #555",
-                    padding:
-                      "10px",
+                    fontSize: "18px",
+                    color: "#ddd",
                   }}
                 >
-                  Ca trực
-                </th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {personSchedule.map(
-                (
-                  item,
-                  index
-                ) => (
-                  <tr
-                    key={
-                      index
-                    }
-                  >
-                    <td
-                      style={{
-                        border:
-                          "1px solid #555",
-                        padding:
-                          "10px",
-                      }}
-                    >
-                      {
-                        item.date
-                      }
-                    </td>
-
-                    <td
-                      style={{
-                        border:
-                          "1px solid #555",
-                        padding:
-                          "10px",
-                      }}
-                    >
-                      {
-                        item.shift
-                      }
-                    </td>
-                  </tr>
-                )
-              )}
-            </tbody>
-          </table>
+                  {item.shift === "18h - 22h"
+                    ? "🕕"
+                    : item.shift === "22h - 24h"
+                    ? "📋"
+                    : "🌙"}{" "}
+                  {item.shift}
+                </div>
+              </div>
+            ))}
+          </div>
         </>
       )}
 
