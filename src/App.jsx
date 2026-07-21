@@ -1,120 +1,160 @@
 import { useState } from "react";
 import dayjs from "dayjs";
-import customParseFormat from "dayjs/plugin/customParseFormat";
 
-dayjs.extend(customParseFormat);
-
-const employees = [
-  { name: "Tuấn Khôi", startDate: "2026-07-01" },
-  { name: "Đăng Khoa", startDate: "2026-07-05" },
-  { name: "Kiến Hoa", startDate: "2026-07-09" },
-  { name: "Văn Tài", startDate: "2026-07-13" },
-  { name: "Hoàng Sơn", startDate: "2026-07-17" },
-  { name: "Tuấn Phát", startDate: "2026-07-21" },
+const members = [
+  "Tuấn Khôi",
+  "Kiến Hoa",
+  "Văn Tài",
+  "Hoàng Sơn",
+  "Tuấn Phát",
+  "Đăng Khoa",
 ];
 
-function generateSchedule(startDate) {
-  const schedules = [];
-  let current = dayjs(startDate);
+const START_DATE = "2026-07-05";
 
-  while (current.year() <= 2027) {
-    schedules.push({
-      date: current.format("DD/MM/YYYY"),
-      shift: "18h - 22h",
-    });
+const START_ASSIGNMENT = {
+  shift1822: "Tuấn Khôi",
+  shift2224: "Hoàng Sơn",
+  shift220630: "Tuấn Phát",
+};
 
-    schedules.push({
-      date: current.add(12, "day").format("DD/MM/YYYY"),
-      shift: "Ngủ chính (22h - 06h30)",
-    });
+function nextPerson(person, step = 1) {
+  const index = members.indexOf(person);
 
-    schedules.push({
-      date: current.add(16, "day").format("DD/MM/YYYY"),
-      shift: "Hỗ trợ điểm danh (22h - 24h)",
-    });
-
-    current = current.add(28, "day");
-  }
-
-  return schedules.sort((a, b) => {
-    return (
-      dayjs(a.date, "DD/MM/YYYY").valueOf() -
-      dayjs(b.date, "DD/MM/YYYY").valueOf()
-    );
-  });
+  return members[
+    (index + step) % members.length
+  ];
 }
 
-function generateAllSchedules() {
-  const all = [];
+function generateMasterSchedule() {
+  const schedules = [];
 
-  employees.forEach((employee) => {
-    const schedules = generateSchedule(employee.startDate);
+  let currentDate = dayjs(START_DATE);
 
-    schedules.forEach((schedule) => {
-      all.push({
-        person: employee.name,
-        date: schedule.date,
-        shift: schedule.shift,
-      });
+  let shift1822 =
+    START_ASSIGNMENT.shift1822;
+
+  let shift2224 =
+    START_ASSIGNMENT.shift2224;
+
+  let shift220630 =
+    START_ASSIGNMENT.shift220630;
+
+  while (currentDate.year() <= 2027) {
+    schedules.push({
+      date: currentDate.format(
+        "DD/MM/YYYY"
+      ),
+      shift1822,
+      shift2224,
+      shift220630,
     });
+
+    currentDate = currentDate.add(
+      4,
+      "day"
+    );
+
+    shift1822 = nextPerson(
+      shift1822
+    );
+
+    shift2224 = nextPerson(
+      shift2224
+    );
+
+    shift220630 = nextPerson(
+      shift220630
+    );
+  }
+
+  return schedules;
+}
+
+function getPersonSchedule(
+  personName,
+  masterSchedule
+) {
+  const result = [];
+
+  masterSchedule.forEach((item) => {
+    if (
+      item.shift1822 === personName
+    ) {
+      result.push({
+        date: item.date,
+        shift: "18h - 22h",
+      });
+    }
+
+    if (
+      item.shift2224 === personName
+    ) {
+      result.push({
+        date: item.date,
+        shift: "22h - 24h",
+      });
+    }
+
+    if (
+      item.shift220630 === personName
+    ) {
+      result.push({
+        date: item.date,
+        shift: "22h - 06h30",
+      });
+    }
   });
 
-  return all;
+  return result;
 }
 
 export default function App() {
-  const [tab, setTab] = useState("person");
+  const [tab, setTab] =
+    useState("person");
 
-  const [selectedName, setSelectedName] = useState(
-    employees[0].name
-  );
+  const [selectedPerson, setSelectedPerson] =
+    useState(members[0]);
 
-  const [selectedDate, setSelectedDate] = useState(
-    dayjs().format("YYYY-MM-DD")
-  );
+  const [selectedDate, setSelectedDate] =
+    useState(dayjs(
+      START_DATE
+    ).format("YYYY-MM-DD"));
 
-  const user = employees.find(
-    (x) => x.name === selectedName
-  );
+  const masterSchedule =
+    generateMasterSchedule();
 
-  const schedules = generateSchedule(user.startDate);
-
-  const allSchedules = generateAllSchedules();
-
-  const schedulesByDate = allSchedules.filter((item) => {
-    return (
-      dayjs(item.date, "DD/MM/YYYY").format(
-        "YYYY-MM-DD"
-      ) === selectedDate
+  const personSchedule =
+    getPersonSchedule(
+      selectedPerson,
+      masterSchedule
     );
-  });
 
-  const today = dayjs().startOf("day");
+  const selectedDay =
+    masterSchedule.find(
+      (item) =>
+        dayjs(
+          item.date,
+          "DD/MM/YYYY"
+        ).format(
+          "YYYY-MM-DD"
+        ) === selectedDate
+    );
 
-  const nextShift = schedules
-    .filter((item) => {
-      const shiftDate = dayjs(
+  const today = dayjs();
+
+  const nextShift =
+    personSchedule.find((item) =>
+      dayjs(
         item.date,
         "DD/MM/YYYY"
-      );
-
-      return (
-        shiftDate.isSame(today) ||
-        shiftDate.isAfter(today)
-      );
-    })
-    .sort((a, b) => {
-      return (
-        dayjs(
-          a.date,
-          "DD/MM/YYYY"
-        ).valueOf() -
-        dayjs(
-          b.date,
-          "DD/MM/YYYY"
-        ).valueOf()
-      );
-    })[0];
+      ).isAfter(
+        today.subtract(
+          1,
+          "day"
+        )
+      )
+    );
 
   return (
     <div
@@ -128,7 +168,6 @@ export default function App() {
       <h1
         style={{
           textAlign: "center",
-          marginBottom: "30px",
         }}
       >
         LỊCH TRỰC DQTV
@@ -137,21 +176,26 @@ export default function App() {
       <div
         style={{
           display: "flex",
-          justifyContent: "center",
+          justifyContent:
+            "center",
           gap: "10px",
-          marginBottom: "30px",
+          marginBottom: "20px",
         }}
       >
         <button
-          onClick={() => setTab("person")}
+          onClick={() =>
+            setTab("person")
+          }
         >
-          👤 Theo người
+          Theo người
         </button>
 
         <button
-          onClick={() => setTab("date")}
+          onClick={() =>
+            setTab("date")
+          }
         >
-          📅 Theo ngày
+          Theo ngày
         </button>
       </div>
 
@@ -159,64 +203,84 @@ export default function App() {
         <>
           <div
             style={{
-              textAlign: "center",
-              marginBottom: "20px",
+              textAlign:
+                "center",
+              marginBottom:
+                "20px",
             }}
           >
             <select
-              value={selectedName}
+              value={
+                selectedPerson
+              }
               onChange={(e) =>
-                setSelectedName(
+                setSelectedPerson(
                   e.target.value
                 )
               }
             >
-              {employees.map((person) => (
-                <option
-                  key={person.name}
-                  value={person.name}
-                >
-                  {person.name}
-                </option>
-              ))}
+              {members.map(
+                (
+                  person
+                ) => (
+                  <option
+                    key={
+                      person
+                    }
+                  >
+                    {
+                      person
+                    }
+                  </option>
+                )
+              )}
             </select>
           </div>
 
           {nextShift && (
             <div
               style={{
-                background: "#15301a",
+                background:
+                  "#16351d",
                 border:
                   "1px solid #4caf50",
-                borderRadius: "10px",
-                padding: "20px",
-                marginBottom: "25px",
-                textAlign: "center",
+                borderRadius:
+                  "10px",
+                padding:
+                  "20px",
+                marginBottom:
+                  "20px",
               }}
             >
               <h3>
-                Ca trực tiếp theo
+                Ca trực tiếp
+                theo
               </h3>
 
               <p>
                 <strong>
                   Ngày:
                 </strong>{" "}
-                {nextShift.date}
+                {
+                  nextShift.date
+                }
               </p>
 
               <p>
                 <strong>
                   Ca:
                 </strong>{" "}
-                {nextShift.shift}
+                {
+                  nextShift.shift
+                }
               </p>
             </div>
           )}
 
           <table
             style={{
-              width: "100%",
+              width:
+                "100%",
               borderCollapse:
                 "collapse",
             }}
@@ -227,7 +291,8 @@ export default function App() {
                   style={{
                     border:
                       "1px solid #555",
-                    padding: "12px",
+                    padding:
+                      "10px",
                   }}
                 >
                   Ngày
@@ -237,7 +302,8 @@ export default function App() {
                   style={{
                     border:
                       "1px solid #555",
-                    padding: "12px",
+                    padding:
+                      "10px",
                   }}
                 >
                   Ca trực
@@ -246,20 +312,22 @@ export default function App() {
             </thead>
 
             <tbody>
-              {schedules.map(
+              {personSchedule.map(
                 (
                   item,
                   index
                 ) => (
                   <tr
-                    key={index}
+                    key={
+                      index
+                    }
                   >
                     <td
                       style={{
                         border:
                           "1px solid #555",
                         padding:
-                          "12px",
+                          "10px",
                       }}
                     >
                       {
@@ -272,7 +340,7 @@ export default function App() {
                         border:
                           "1px solid #555",
                         padding:
-                          "12px",
+                          "10px",
                       }}
                     >
                       {
@@ -291,13 +359,17 @@ export default function App() {
         <>
           <div
             style={{
-              textAlign: "center",
-              marginBottom: "25px",
+              textAlign:
+                "center",
+              marginBottom:
+                "20px",
             }}
           >
             <input
               type="date"
-              value={selectedDate}
+              value={
+                selectedDate
+              }
               onChange={(e) =>
                 setSelectedDate(
                   e.target.value
@@ -306,51 +378,56 @@ export default function App() {
             />
           </div>
 
-          <div
-            style={{
-              display: "grid",
-              gap: "15px",
-            }}
-          >
-            {schedulesByDate.length >
-            0 ? (
-              schedulesByDate.map(
-                (
-                  item,
-                  index
-                ) => (
-                  <div
-                    key={index}
-                    style={{
-                      border:
-                        "1px solid #555",
-                      borderRadius:
-                        "10px",
-                      padding:
-                        "15px",
-                    }}
-                  >
-                    <h3>
-                      {
-                        item.shift
-                      }
-                    </h3>
+          {selectedDay ? (
+            <div
+              style={{
+                border:
+                  "1px solid #555",
+                borderRadius:
+                  "10px",
+                padding:
+                  "20px",
+              }}
+            >
+              <h2>
+                {
+                  selectedDay.date
+                }
+              </h2>
 
-                    <p>
-                      {
-                        item.person
-                      }
-                    </p>
-                  </div>
-                )
-              )
-            ) : (
-              <div>
-                Không có lịch
-                trực ngày này
-              </div>
-            )}
-          </div>
+              <p>
+                <strong>
+                  18h - 22h:
+                </strong>{" "}
+                {
+                  selectedDay.shift1822
+                }
+              </p>
+
+              <p>
+                <strong>
+                  22h - 24h:
+                </strong>{" "}
+                {
+                  selectedDay.shift2224
+                }
+              </p>
+
+              <p>
+                <strong>
+                  22h - 06h30:
+                </strong>{" "}
+                {
+                  selectedDay.shift220630
+                }
+              </p>
+            </div>
+          ) : (
+            <div>
+              Không có lịch
+              trong ngày này
+            </div>
+          )}
         </>
       )}
     </div>
