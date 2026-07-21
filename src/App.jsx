@@ -143,18 +143,15 @@ export default function App() {
 
   const today = dayjs();
 
-  const nextShift =
-    personSchedule.find((item) =>
-      dayjs(
-        item.date,
-        "DD/MM/YYYY"
-      ).isAfter(
-        today.subtract(
-          1,
-          "day"
-        )
-      )
-    );
+    const nextShift = personSchedule
+  .filter((item) =>
+    dayjs(item.date, "DD/MM/YYYY")
+      .isAfter(dayjs().subtract(1, "day"))
+  )
+  .sort((a, b) =>
+    dayjs(a.date, "DD/MM/YYYY").valueOf() -
+    dayjs(b.date, "DD/MM/YYYY").valueOf()
+  )[0];  
 
   return (
     <div
